@@ -1,0 +1,17 @@
+int x, kareem;
+double y;
+int z;
+int sayed;
+double lol;
+char c;
+char *str;
+str = "abcd";
+kareem = 5;
+lol = 2.3563;
+z = y;
+z = y;
+x = -1;
+y = 5;
+sayed = 8;
+c = 'a';
+sayed = c;
