@@ -39,7 +39,6 @@ STRING_VAL	\"{printable_ascii}*\"
 "."		{ return DOT; }
 "-"   { return NEG_OP; }
 "="		{ return ASSIGNMENT_OP; }
-"&"		{ return AMPERSAND_OP; }
 "*"		{ return ASTERISK_OP; }
 
 {IDENTIFIER}    { return IDENTIFIER; }

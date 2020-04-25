@@ -5,6 +5,7 @@
 
 	extern FILE *yyin;
 	extern FILE *yyout;
+
 	extern int line_num;
 	extern int yylex();
 	void yyerror();
@@ -13,7 +14,7 @@
 // parser tokens
 %token IDENTIFIER INT DOUBLE CHAR
 %token INT_VAL DOUBLE_VAL CHAR_VAL STRING_VAL
-%token SEMICOLON COMMA DOT NEG_OP ASSIGNMENT_OP AMPERSAND_OP ASTERISK_OP
+%token SEMICOLON COMMA DOT NEG_OP ASSIGNMENT_OP ASTERISK_OP
 
 %start program
 
@@ -31,21 +32,19 @@ name: variable | name COMMA variable;
 
 variable: IDENTIFIER | ASTERISK_OP IDENTIFIER;
 
-assignments: assigment assigment | assigment;
+assignments: assignments assignment | assignment;
 
 expression: variable | sign value;
 
 sign: NEG_OP | /* empty */; 
 
-value: INT_VAL | DOUBLE_VAL | CHAR_VAL;
+value: INT_VAL | DOUBLE_VAL | CHAR_VAL | STRING_VAL;
 
-assigment: reference variable ASSIGNMENT_OP expression SEMICOLON; 
-
-reference: AMPERSAND_OP | /* empty */;
+assignment: variable ASSIGNMENT_OP expression SEMICOLON; 
 
 %%
 
-void yyerror ()
+void yyerror()
 {
   fprintf(stderr, "Syntax error at line %d\n", line_num);
   exit(1);
