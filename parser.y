@@ -14,7 +14,7 @@
 // parser tokens
 %token IDENTIFIER INT DOUBLE CHAR
 %token INT_VAL DOUBLE_VAL CHAR_VAL STRING_VAL
-%token SEMICOLON COMMA DOT NEG_OP ASSIGNMENT_OP ASTERISK_OP
+%token SEMICOLON COMMA DOT NEG_OP ADD_OP ASSIGNMENT_OP ASTERISK_OP
 
 %start program
 
@@ -34,7 +34,7 @@ variable: IDENTIFIER | ASTERISK_OP IDENTIFIER;
 
 assignments: assignments assignment | assignment;
 
-expression: variable | sign value;
+expression: expression ADD_OP expression | expression NEG_OP expression | variable | sign value;
 
 sign: NEG_OP | /* empty */; 
 

@@ -6,7 +6,7 @@ double lol;
 char c;
 char *str;
 str = "abcd";
-kareem = 5;
+kareem = x - y;
 lol = 2.3563;
 z = y;
 z = y;

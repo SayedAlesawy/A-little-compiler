@@ -40,6 +40,7 @@ STRING_VAL	\"{printable_ascii}*\"
 "-"   { return NEG_OP; }
 "="		{ return ASSIGNMENT_OP; }
 "*"		{ return ASTERISK_OP; }
+"+"   { return ADD_OP; }
 
 {IDENTIFIER}    { return IDENTIFIER; }
 {INT_VAL} 		  { return INT_VAL; }
