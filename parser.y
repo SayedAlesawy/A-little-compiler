@@ -24,11 +24,13 @@
 
 %type <token> type
 
-%start program
+%start statements
 
 // grammar rules
 %%
-program: declarations assignments;
+statements: statements statement | statement;
+
+statement: declarations | assignments
 
 declarations: declarations declaration | declaration;
 
