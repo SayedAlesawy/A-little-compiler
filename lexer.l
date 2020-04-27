@@ -11,6 +11,8 @@
 	
 	int line_num = 1;
 	void yyerror();
+
+	void save_token();
 %}
 
 %x LINE
@@ -30,26 +32,31 @@ STRING_VAL	\"{printable_ascii}*\"
 	
 <LINE>"\n"		{ line_num += 1; }
 
-"int"	    { return INT; }
-"double"	{ return DOUBLE; }
-"char"    { return CHAR; }
+"int"	    { save_token(); return INT; }
+"double"	{ save_token(); return DOUBLE; }
+"char"    { save_token(); return CHAR; }
+"string"  { save_token(); return STRING; }
 
 ";"   { return SEMICOLON; }
-","		{ return COMMA; }
 "."		{ return DOT; }
-"-"   { return NEG_OP; }
-"="		{ return ASSIGNMENT_OP; }
-"*"		{ return ASTERISK_OP; }
+"-"   { return MINUS_OP; }
 "+"   { return ADD_OP; }
+"="		{ return ASSIGNMENT_OP; }
 
-{IDENTIFIER}    { return IDENTIFIER; }
-{INT_VAL} 		  { return INT_VAL; }
-{DOUBLE_VAL} 		{ return DOUBLE_VAL; }
-{CHAR_VAL} 		  { return CHAR_VAL; }
-{STRING_VAL}    { return STRING_VAL; }
+{IDENTIFIER}    { save_token(); return IDENTIFIER; }
+{INT_VAL} 		  { save_token(); return INT_VAL; }
+{DOUBLE_VAL} 		{ save_token(); return DOUBLE_VAL; }
+{CHAR_VAL} 		  { save_token(); return CHAR_VAL; }
+{STRING_VAL}    { save_token(); return STRING_VAL; }
 
 "\n"	{ line_num += 1; }
 [ \t\r\f]+
 .			{ yyerror("Parsing encountered an unkown character"); }
 
 %%
+
+void save_token()
+{
+	yylval.token = strndup(yytext, yyleng + 1);
+	yylval.token[yyleng] = '\0';
+}
