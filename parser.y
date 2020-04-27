@@ -2,6 +2,7 @@
 	#include <stdio.h>
 	#include <stdlib.h>
 	#include <string.h>
+	#include <stdbool.h>
 
 	extern FILE *yyin;
 	extern FILE *yyout;
@@ -9,15 +10,22 @@
 	extern int line_num;
 	extern int yylex();
 	void yyerror();
+
 	void print_quad();
 	void print_tuple();
 	void insert_declration();
 	void insert_quad_assign();
 	void insert_tuple_assign();
 
+	void insert_in_sym_tab();
+
 	struct statment {
 		int lino, ty;
 		char type[50], name[50], dst[50], src1[50], src2[50], op[50];
+	};
+
+	struct sym_tab_entry {
+		char type[50], name[50], value[50];
 	};
 %}
 
@@ -41,7 +49,7 @@ statement: declarations | assignments
 
 declarations: declarations declaration | declaration;
 
-declaration: type IDENTIFIER SEMICOLON { insert_declration($1, $2); }
+declaration: type IDENTIFIER SEMICOLON { insert_in_sym_tab($1, $2); insert_declration($1, $2); }
 
 type: INT | DOUBLE | CHAR | STRING;
 
@@ -56,6 +64,46 @@ assignment: IDENTIFIER ASSIGNMENT_OP IDENTIFIER ADD_OP IDENTIFIER SEMICOLON   { 
 					| IDENTIFIER ASSIGNMENT_OP STRING_VAL SEMICOLON                     { insert_tuple_assign($1, $3); }
 					;
 %%
+
+struct sym_tab_entry sym_table[100];
+int sym_tab_idx = 0;
+
+bool in_sym_table(char* name) {
+	for(int i = 0; i < sym_tab_idx; i++) {
+		int eq = strcmp(name, sym_table[i].name);
+
+		if(eq == 0) return true;
+	}
+
+	return false;
+}
+
+char* get_type_from_sym_tab(char* name)
+{
+	for(int i = 0; i < sym_tab_idx; i++) {
+		int eq = strcmp(name, sym_table[i].name);
+
+		if(eq == 0) return sym_table[i].type;
+	}
+}
+
+void insert_in_sym_tab(char* type, char* name)
+{
+	if(in_sym_table(name)) yyerror();
+
+	struct sym_tab_entry sym_entry;
+
+	strcpy(sym_entry.type, type);
+	strcpy(sym_entry.name, name);
+
+	sym_table[sym_tab_idx++] = sym_entry;
+}
+
+void print_sym_tab() {
+	for(int i = 0; i < sym_tab_idx; i++) {
+		printf("[%d] type: %s\t name: %s\t value: %s\n", i+1, sym_table[i].type, sym_table[i].name, sym_table[i].value);
+	}
+}
 
 struct statment stmts[100];
 int stmts_idx = 0;
@@ -130,6 +178,12 @@ void print_quadruples()
 	}
 }
 
+// void semantic_failure(char* msg)
+// {
+// 	fprintf(stderr, msg);
+//   exit(1);
+// }
+
 void yyerror()
 {
   fprintf(stderr, "Syntax error at line %d\n", line_num);
@@ -144,6 +198,8 @@ int main (int argc, char *argv[]){
 	fclose(yyin);
 	
 	if(!flag) print_quadruples();
+
+	print_sym_tab();
 
 	return flag;
 }
