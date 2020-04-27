@@ -1,3 +1,4 @@
+x = 1;
 int x;
 double y;
 int z;
@@ -9,6 +10,7 @@ str = "sayed";
 str = "abcd";
 kareem = x - y;
 lol = 2.3563;
+int hamada;
 z = y;
 z = y;
 x = 1;
