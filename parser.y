@@ -11,7 +11,14 @@
 	void yyerror();
 	void print_quad();
 	void print_tuple();
-	void print_declration();
+	void insert_declration();
+	void insert_quad_assign();
+	void insert_tuple_assign();
+
+	struct statment {
+		int lino, ty;
+		char type[50], name[50], dst[50], src1[50], src2[50], op[50];
+	};
 %}
 
 %union {
@@ -34,43 +41,93 @@ statement: declarations | assignments
 
 declarations: declarations declaration | declaration;
 
-declaration: type IDENTIFIER SEMICOLON { print_declration($1, $2); }
+declaration: type IDENTIFIER SEMICOLON { insert_declration($1, $2); }
 
 type: INT | DOUBLE | CHAR | STRING;
 
 assignments: assignments assignment | assignment;
 
-assignment: IDENTIFIER ASSIGNMENT_OP IDENTIFIER ADD_OP IDENTIFIER SEMICOLON   { print_quad($1, $3, "+", $5); }
-					| IDENTIFIER ASSIGNMENT_OP IDENTIFIER MINUS_OP IDENTIFIER SEMICOLON { print_quad($1, $3, "-", $5); }
-					| IDENTIFIER ASSIGNMENT_OP IDENTIFIER SEMICOLON                     { print_tuple($1, $3); }
-					| IDENTIFIER ASSIGNMENT_OP INT_VAL SEMICOLON                      	{ print_tuple($1, $3); }
-					| IDENTIFIER ASSIGNMENT_OP DOUBLE_VAL SEMICOLON                     { print_tuple($1, $3); }
-					| IDENTIFIER ASSIGNMENT_OP CHAR_VAL SEMICOLON                       { print_tuple($1, $3); }
-					| IDENTIFIER ASSIGNMENT_OP STRING_VAL SEMICOLON                     { print_tuple($1, $3); }
+assignment: IDENTIFIER ASSIGNMENT_OP IDENTIFIER ADD_OP IDENTIFIER SEMICOLON   { insert_quad_assign($1, $3, "+", $5); }
+					| IDENTIFIER ASSIGNMENT_OP IDENTIFIER MINUS_OP IDENTIFIER SEMICOLON { insert_quad_assign($1, $3, "-", $5); }
+					| IDENTIFIER ASSIGNMENT_OP IDENTIFIER SEMICOLON                     { insert_tuple_assign($1, $3); }
+					| IDENTIFIER ASSIGNMENT_OP INT_VAL SEMICOLON                      	{ insert_tuple_assign($1, $3); }
+					| IDENTIFIER ASSIGNMENT_OP DOUBLE_VAL SEMICOLON                     { insert_tuple_assign($1, $3); }
+					| IDENTIFIER ASSIGNMENT_OP CHAR_VAL SEMICOLON                       { insert_tuple_assign($1, $3); }
+					| IDENTIFIER ASSIGNMENT_OP STRING_VAL SEMICOLON                     { insert_tuple_assign($1, $3); }
 					;
 %%
 
-void print_declration(char* type, char* name)
+struct statment stmts[100];
+int stmts_idx = 0;
+
+void insert_declration(char* type, char* name)
 {
-	printf("\nline: %d\n", line_num);
-	printf("type: %s\n", type);
-	printf("name: %s\n", name);
+	struct statment stmt;
+
+	stmt.lino = line_num;
+	stmt.ty = 0;
+	strcpy(stmt.type, type);
+	strcpy(stmt.name, name);
+	
+	stmts[stmts_idx++] = stmt;
 }
 
-void print_quad(char* dst, char* src1, char* op, char* src2)
+void insert_quad_assign(char* dst, char* src1, char* op, char* src2)
 {
-	printf("\nline: %d\n", line_num);
-	printf("destination: %s\n", dst);
-	printf("source1: %s\n", src1);
-	printf("operation: %s\n", op);
-	printf("source2: %s\n", src2);
+	struct statment stmt;
+
+	stmt.lino = line_num;
+	stmt.ty = 1;
+	strcpy(stmt.dst, dst);
+	strcpy(stmt.src1, src1);
+	strcpy(stmt.src2, src2);
+	strcpy(stmt.op, op);
+
+	stmts[stmts_idx++] = stmt;
 }
 
-void print_tuple(char* dst, char* src)
+void insert_tuple_assign(char* dst, char* src)
 {
-	printf("\nline: %d\n", line_num);
-	printf("destination: %s\n", dst);
-	printf("source: %s\n", src);
+	struct statment stmt;
+
+	stmt.lino = line_num;
+	stmt.ty = 2;
+	strcpy(stmt.dst, dst);
+	strcpy(stmt.src1, src);
+
+	stmts[stmts_idx++] = stmt;
+}
+
+void print_declrations(struct statment stmt)
+{
+	printf("\nline: %d\n", stmt.lino);
+	printf("type: %s\n", stmt.type);
+	printf("name: %s\n", stmt.name);
+}
+
+void print_quad_assigns(struct statment stmt)
+{
+	printf("\nline: %d\n", stmt.lino);
+	printf("destination: %s\n", stmt.dst);
+	printf("source1: %s\n", stmt.src1);
+	printf("operation: %s\n", stmt.op);
+	printf("source2: %s\n", stmt.src2);
+}
+
+void print_tuple_assigns(struct statment stmt)
+{
+	printf("\nline: %d\n", stmt.lino);
+	printf("destination: %s\n", stmt.dst);
+	printf("source: %s\n", stmt.src1);
+}
+
+void print_quadruples()
+{
+	for(int i = 0; i < stmts_idx; i++){
+		if(stmts[i].ty == 0) print_declrations(stmts[i]);
+		if(stmts[i].ty == 1) print_quad_assigns(stmts[i]);
+		if(stmts[i].ty == 2) print_tuple_assigns(stmts[i]);
+	}
 }
 
 void yyerror()
@@ -86,5 +143,7 @@ int main (int argc, char *argv[]){
 	flag = yyparse();
 	fclose(yyin);
 	
+	if(!flag) print_quadruples();
+
 	return flag;
 }
