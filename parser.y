@@ -95,6 +95,16 @@ char* get_type_from_sym_tab(char* name)
 	}
 }
 
+char* get_value_from_sym_tab(char* name)
+{
+	for(int i = 0; i < sym_tab_idx; i++) {
+		int eq = strcmp(name, sym_table[i].name);
+
+		if(eq == 0) return sym_table[i].value;
+	}
+}
+
+
 bool is_intialized(char* name)
 {
 	for(int i = 0; i < sym_tab_idx; i++) {
@@ -117,7 +127,7 @@ void insert_in_sym_tab(char* type, char* name)
 	sym_table[sym_tab_idx++] = sym_entry;
 }
 
-void set_intialized_state_for_var(char* name)
+void set_intialized_state_for_var(char* name, char * value)
 {
 	for(int i = 0; i < sym_tab_idx; i++) {
 		int eq = strcmp(name, sym_table[i].name);
@@ -125,6 +135,7 @@ void set_intialized_state_for_var(char* name)
 		if(eq == 0) 
 		{
 			sym_table[i].intialized = 1;
+			strcpy(sym_table[i].value, value);
 		}
 	}
 }
@@ -145,7 +156,7 @@ void intialize_variable_number(char * name, char * value)
 	char* var_type = get_type_from_sym_tab(name);
 	if( var_type == NULL) { semantic_failure(); return; }
 	if(!check_type_match(var_type, "int") && !check_type_match(var_type, "double")) { semantic_failure(); return; }
-	set_intialized_state_for_var(name);
+	set_intialized_state_for_var(name, value);
 }
 
 void intialize_variable_string(char * name, char *value)
@@ -154,7 +165,7 @@ void intialize_variable_string(char * name, char *value)
 	char* var_type = get_type_from_sym_tab(name);
 	if( var_type == NULL) { semantic_failure(); return; }
 	if(!check_type_match(var_type, "string")) { semantic_failure(); return; }
-	set_intialized_state_for_var(name);
+	set_intialized_state_for_var(name, value);
 }
 
 
@@ -165,7 +176,7 @@ void intialize_variable_char(char * name, char *value)
 	if( var_type == NULL) { semantic_failure(); return; }
 	char* required_type = "char";
 	if(!check_type_match(var_type, "char")) { semantic_failure(); return; }
-	set_intialized_state_for_var(name);
+	set_intialized_state_for_var(name, value);
 }
 
 bool is_castable(char * v1_type, char * v2_type)
@@ -180,7 +191,8 @@ void intialize_variable_variable(char * v1_name, char * v2_name)
 	char * v2_type = get_type_from_sym_tab(v2_name);
 
 	if(!check_type_match(v1_type, v2_type) && !is_castable(v1_type, v2_type)) { semantic_failure(); return; }
-	set_intialized_state_for_var(v1_name);
+	char * v2_value = get_value_from_sym_tab(v2_name);
+	set_intialized_state_for_var(v1_name, v2_value);
 }
 
 void intialize_variable_expression(char * v1_name, char * v2_name, char * v3_name)
