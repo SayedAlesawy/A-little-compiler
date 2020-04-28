@@ -9,7 +9,9 @@
 
 	extern int line_num;
 	extern int yylex();
+
 	void yyerror();
+	void semantic_failure();
 
 	void print_quad();
 	void print_tuple();
@@ -105,7 +107,7 @@ bool is_intialized(char* name)
 
 void insert_in_sym_tab(char* type, char* name)
 {
-	if(in_sym_table(name)) yyerror();
+	if(in_sym_table(name)) semantic_failure();
 
 	struct sym_tab_entry sym_entry;
 
@@ -140,16 +142,16 @@ bool check_type_match(char* required_type, char* var_type)
 void intialize_variable_number(char * name, char * value)
 {
 	char* var_type = get_type_from_sym_tab(name);
-	if( var_type == NULL) yyerror();
-	if(!check_type_match(var_type, "int") && !check_type_match(var_type, "double")) yyerror();
+	if( var_type == NULL) semantic_failure();
+	if(!check_type_match(var_type, "int") && !check_type_match(var_type, "double")) semantic_failure();
 	set_intialized_state_for_var(name);
 }
 
 void intialize_variable_string(char * name, char *value)
 {
 	char* var_type = get_type_from_sym_tab(name);
-	if( var_type == NULL) yyerror();
-	if(!check_type_match(var_type, "string")) yyerror();
+	if( var_type == NULL) semantic_failure();
+	if(!check_type_match(var_type, "string")) semantic_failure();
 	set_intialized_state_for_var(name);
 }
 
@@ -157,9 +159,9 @@ void intialize_variable_string(char * name, char *value)
 void intialize_variable_char(char * name, char *value)
 {
 	char* var_type = get_type_from_sym_tab(name);
-	if( var_type == NULL) yyerror();
+	if( var_type == NULL) semantic_failure();
 	char* required_type = "char";
-	if(!check_type_match(var_type, "char")) yyerror();
+	if(!check_type_match(var_type, "char")) semantic_failure();
 	set_intialized_state_for_var(name);
 }
 
@@ -169,11 +171,11 @@ bool is_castable(char * v1_type, char * v2_type)
 }
 void intialize_variable_variable(char * v1_name, char * v2_name)
 {
-	if(!is_intialized(v2_name)) yyerror();
+	if(!is_intialized(v2_name)) semantic_failure();
 	char * v1_type = get_type_from_sym_tab(v1_name);
 	char * v2_type = get_type_from_sym_tab(v2_name);
 
-	if(!check_type_match(v1_type, v2_type) && !is_castable(v1_type, v2_type)) yyerror();
+	if(!check_type_match(v1_type, v2_type) && !is_castable(v1_type, v2_type)) semantic_failure();
 	set_intialized_state_for_var(v1_name);
 }
 
@@ -262,11 +264,10 @@ void print_quadruples()
 	}
 }
 
-// void semantic_failure(char* msg)
-// {
-// 	fprintf(stderr, msg);
-//   exit(1);
-// }
+void semantic_failure()
+{
+	fprintf(stderr, "Semantic error at line %d\n", line_num);
+}
 
 void yyerror()
 {
