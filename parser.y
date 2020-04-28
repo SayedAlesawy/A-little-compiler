@@ -9,13 +9,20 @@
 
 	extern int line_num;
 	extern int yylex();
+
 	void yyerror();
+	void semantic_failure();
 
 	void print_quad();
 	void print_tuple();
 	void insert_declration();
 	void insert_quad_assign();
 	void insert_tuple_assign();
+	void intialize_variable_number();
+	void intialize_variable_string();
+	void intialize_variable_char();
+	void intialize_variable_variable();
+	void intialize_variable_expression();
 
 	void insert_in_sym_tab();
 
@@ -26,6 +33,7 @@
 
 	struct sym_tab_entry {
 		char type[50], name[50], value[50];
+		bool intialized;
 	};
 %}
 
@@ -55,13 +63,13 @@ type: INT | DOUBLE | CHAR | STRING;
 
 assignments: assignments assignment | assignment;
 
-assignment: IDENTIFIER ASSIGNMENT_OP IDENTIFIER ADD_OP IDENTIFIER SEMICOLON   { insert_quad_assign($1, $3, "+", $5); }
-					| IDENTIFIER ASSIGNMENT_OP IDENTIFIER MINUS_OP IDENTIFIER SEMICOLON { insert_quad_assign($1, $3, "-", $5); }
-					| IDENTIFIER ASSIGNMENT_OP IDENTIFIER SEMICOLON                     { insert_tuple_assign($1, $3); }
-					| IDENTIFIER ASSIGNMENT_OP INT_VAL SEMICOLON                      	{ insert_tuple_assign($1, $3); }
-					| IDENTIFIER ASSIGNMENT_OP DOUBLE_VAL SEMICOLON                     { insert_tuple_assign($1, $3); }
-					| IDENTIFIER ASSIGNMENT_OP CHAR_VAL SEMICOLON                       { insert_tuple_assign($1, $3); }
-					| IDENTIFIER ASSIGNMENT_OP STRING_VAL SEMICOLON                     { insert_tuple_assign($1, $3); }
+assignment: IDENTIFIER ASSIGNMENT_OP IDENTIFIER ADD_OP IDENTIFIER SEMICOLON   { insert_quad_assign($1, $3, "+", $5); intialize_variable_expression($1, $3, $5);}
+					| IDENTIFIER ASSIGNMENT_OP IDENTIFIER MINUS_OP IDENTIFIER SEMICOLON { insert_quad_assign($1, $3, "-", $5); intialize_variable_expression($1, $3, $5);}
+					| IDENTIFIER ASSIGNMENT_OP IDENTIFIER SEMICOLON                     { insert_tuple_assign($1, $3); intialize_variable_variable($1, $3); }
+					| IDENTIFIER ASSIGNMENT_OP INT_VAL SEMICOLON                      	{ insert_tuple_assign($1, $3); intialize_variable_number($1, $3); }
+					| IDENTIFIER ASSIGNMENT_OP DOUBLE_VAL SEMICOLON                     { insert_tuple_assign($1, $3); intialize_variable_number($1, $3); }
+					| IDENTIFIER ASSIGNMENT_OP CHAR_VAL SEMICOLON                       { insert_tuple_assign($1, $3); intialize_variable_char($1, $3); }
+					| IDENTIFIER ASSIGNMENT_OP STRING_VAL SEMICOLON                     { insert_tuple_assign($1, $3); intialize_variable_string($1, $3); }
 					;
 %%
 
@@ -87,9 +95,19 @@ char* get_type_from_sym_tab(char* name)
 	}
 }
 
+bool is_intialized(char* name)
+{
+	for(int i = 0; i < sym_tab_idx; i++) {
+		int eq = strcmp(name, sym_table[i].name);
+
+		if(eq == 0) return sym_table[i].intialized;
+	}
+	return false;
+}
+
 void insert_in_sym_tab(char* type, char* name)
 {
-	if(in_sym_table(name)) yyerror();
+	if(in_sym_table(name)) semantic_failure();
 
 	struct sym_tab_entry sym_entry;
 
@@ -97,6 +115,74 @@ void insert_in_sym_tab(char* type, char* name)
 	strcpy(sym_entry.name, name);
 
 	sym_table[sym_tab_idx++] = sym_entry;
+}
+
+void set_intialized_state_for_var(char* name)
+{
+	for(int i = 0; i < sym_tab_idx; i++) {
+		int eq = strcmp(name, sym_table[i].name);
+
+		if(eq == 0) 
+		{
+			sym_table[i].intialized = 1;
+		}
+	}
+}
+
+bool check_type_match(char* required_type, char* var_type)
+{
+	if(strlen(required_type) != strlen(var_type)) return false;
+	for(int i = 0; i < strlen(required_type); i += 1)
+	{
+		if(required_type[i] != var_type[i]) return false;
+	}
+	return true;
+}
+
+void intialize_variable_number(char * name, char * value)
+{
+	char* var_type = get_type_from_sym_tab(name);
+	if( var_type == NULL) semantic_failure();
+	if(!check_type_match(var_type, "int") && !check_type_match(var_type, "double")) semantic_failure();
+	set_intialized_state_for_var(name);
+}
+
+void intialize_variable_string(char * name, char *value)
+{
+	char* var_type = get_type_from_sym_tab(name);
+	if( var_type == NULL) semantic_failure();
+	if(!check_type_match(var_type, "string")) semantic_failure();
+	set_intialized_state_for_var(name);
+}
+
+
+void intialize_variable_char(char * name, char *value)
+{
+	char* var_type = get_type_from_sym_tab(name);
+	if( var_type == NULL) semantic_failure();
+	char* required_type = "char";
+	if(!check_type_match(var_type, "char")) semantic_failure();
+	set_intialized_state_for_var(name);
+}
+
+bool is_castable(char * v1_type, char * v2_type)
+{
+	return (check_type_match(v1_type, "int") || check_type_match(v1_type, "double")) && (check_type_match(v2_type, "int") || check_type_match(v2_type, "double"));
+}
+void intialize_variable_variable(char * v1_name, char * v2_name)
+{
+	if(!is_intialized(v2_name)) semantic_failure();
+	char * v1_type = get_type_from_sym_tab(v1_name);
+	char * v2_type = get_type_from_sym_tab(v2_name);
+
+	if(!check_type_match(v1_type, v2_type) && !is_castable(v1_type, v2_type)) semantic_failure();
+	set_intialized_state_for_var(v1_name);
+}
+
+void intialize_variable_expression(char * v1_name, char * v2_name, char * v3_name)
+{
+	intialize_variable_variable(v1_name, v2_name);
+	intialize_variable_variable(v1_name, v3_name);
 }
 
 void print_sym_tab() {
@@ -178,11 +264,10 @@ void print_quadruples()
 	}
 }
 
-// void semantic_failure(char* msg)
-// {
-// 	fprintf(stderr, msg);
-//   exit(1);
-// }
+void semantic_failure()
+{
+	fprintf(stderr, "Semantic error at line %d\n", line_num);
+}
 
 void yyerror()
 {
