@@ -107,7 +107,7 @@ bool is_intialized(char* name)
 
 void insert_in_sym_tab(char* type, char* name)
 {
-	if(in_sym_table(name)) semantic_failure();
+	if(in_sym_table(name)) { semantic_failure(); return; }
 
 	struct sym_tab_entry sym_entry;
 
@@ -141,30 +141,30 @@ bool check_type_match(char* required_type, char* var_type)
 
 void intialize_variable_number(char * name, char * value)
 {
-	if(!in_sym_table(name))  yyerror();
+	if(!in_sym_table(name)) { semantic_failure(); return; }
 	char* var_type = get_type_from_sym_tab(name);
-	if( var_type == NULL) semantic_failure();
-	if(!check_type_match(var_type, "int") && !check_type_match(var_type, "double")) semantic_failure();
+	if( var_type == NULL) { semantic_failure(); return; }
+	if(!check_type_match(var_type, "int") && !check_type_match(var_type, "double")) { semantic_failure(); return; }
 	set_intialized_state_for_var(name);
 }
 
 void intialize_variable_string(char * name, char *value)
 {
-	if(!in_sym_table(name))  yyerror();
+	if(!in_sym_table(name)) { semantic_failure(); return; }
 	char* var_type = get_type_from_sym_tab(name);
-	if( var_type == NULL) semantic_failure();
-	if(!check_type_match(var_type, "string")) semantic_failure();
+	if( var_type == NULL) { semantic_failure(); return; }
+	if(!check_type_match(var_type, "string")) { semantic_failure(); return; }
 	set_intialized_state_for_var(name);
 }
 
 
 void intialize_variable_char(char * name, char *value)
 {
-	if(!in_sym_table(name))  yyerror();
+	if(!in_sym_table(name)) { semantic_failure(); return; }
 	char* var_type = get_type_from_sym_tab(name);
-	if( var_type == NULL) semantic_failure();
+	if( var_type == NULL) { semantic_failure(); return; }
 	char* required_type = "char";
-	if(!check_type_match(var_type, "char")) semantic_failure();
+	if(!check_type_match(var_type, "char")) { semantic_failure(); return; }
 	set_intialized_state_for_var(name);
 }
 
@@ -174,12 +174,12 @@ bool is_castable(char * v1_type, char * v2_type)
 }
 void intialize_variable_variable(char * v1_name, char * v2_name)
 {
-	if(!in_sym_table(v1_name) || !in_sym_table(v2_name))  yyerror();
-	if(!is_intialized(v2_name)) semantic_failure();
+	if(!in_sym_table(v1_name) || !in_sym_table(v2_name)) { semantic_failure(); return; }
+	if(!is_intialized(v2_name)) { semantic_failure(); return; }
 	char * v1_type = get_type_from_sym_tab(v1_name);
 	char * v2_type = get_type_from_sym_tab(v2_name);
 
-	if(!check_type_match(v1_type, v2_type) && !is_castable(v1_type, v2_type)) semantic_failure();
+	if(!check_type_match(v1_type, v2_type) && !is_castable(v1_type, v2_type)) { semantic_failure(); return; }
 	set_intialized_state_for_var(v1_name);
 }
 
