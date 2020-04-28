@@ -141,6 +141,7 @@ bool check_type_match(char* required_type, char* var_type)
 
 void intialize_variable_number(char * name, char * value)
 {
+	if(!in_sym_table(name))  yyerror();
 	char* var_type = get_type_from_sym_tab(name);
 	if( var_type == NULL) semantic_failure();
 	if(!check_type_match(var_type, "int") && !check_type_match(var_type, "double")) semantic_failure();
@@ -149,6 +150,7 @@ void intialize_variable_number(char * name, char * value)
 
 void intialize_variable_string(char * name, char *value)
 {
+	if(!in_sym_table(name))  yyerror();
 	char* var_type = get_type_from_sym_tab(name);
 	if( var_type == NULL) semantic_failure();
 	if(!check_type_match(var_type, "string")) semantic_failure();
@@ -158,6 +160,7 @@ void intialize_variable_string(char * name, char *value)
 
 void intialize_variable_char(char * name, char *value)
 {
+	if(!in_sym_table(name))  yyerror();
 	char* var_type = get_type_from_sym_tab(name);
 	if( var_type == NULL) semantic_failure();
 	char* required_type = "char";
@@ -171,6 +174,7 @@ bool is_castable(char * v1_type, char * v2_type)
 }
 void intialize_variable_variable(char * v1_name, char * v2_name)
 {
+	if(!in_sym_table(v1_name) || !in_sym_table(v2_name))  yyerror();
 	if(!is_intialized(v2_name)) semantic_failure();
 	char * v1_type = get_type_from_sym_tab(v1_name);
 	char * v2_type = get_type_from_sym_tab(v2_name);

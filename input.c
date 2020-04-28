@@ -1,5 +1,6 @@
 string j;
 j = 4;
+str = "ssb";
 int m;
 int x;
 double y;
