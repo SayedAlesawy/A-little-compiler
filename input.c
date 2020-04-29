@@ -1,5 +1,12 @@
+int ma;
+ma = 1;
+int sha;
+sha = 2;
+int ba;
+ba = sha + ma;
 string j;
 j = 4;
+str = "ssb";
 int m;
 int x;
 double y;
