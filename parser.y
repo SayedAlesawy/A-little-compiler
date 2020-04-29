@@ -45,7 +45,7 @@
 %token <token> INT_VAL DOUBLE_VAL CHAR_VAL STRING_VAL
 %token <token> SEMICOLON DOT MINUS_OP ADD_OP ASSIGNMENT_OP
 
-%type <token> type
+%type <token> type variable operator
 
 %start statements
 
@@ -63,14 +63,13 @@ type: INT | DOUBLE | CHAR | STRING;
 
 assignments: assignments assignment | assignment;
 
-assignment: IDENTIFIER ASSIGNMENT_OP IDENTIFIER ADD_OP IDENTIFIER SEMICOLON   { insert_quad_assign($1, $3, "+", $5); intialize_variable_expression($1, $3, $5);}
-					| IDENTIFIER ASSIGNMENT_OP IDENTIFIER MINUS_OP IDENTIFIER SEMICOLON { insert_quad_assign($1, $3, "-", $5); intialize_variable_expression($1, $3, $5);}
-					| IDENTIFIER ASSIGNMENT_OP IDENTIFIER SEMICOLON                     { insert_tuple_assign($1, $3); intialize_variable_variable($1, $3); }
-					| IDENTIFIER ASSIGNMENT_OP INT_VAL SEMICOLON                      	{ insert_tuple_assign($1, $3); intialize_variable_number($1, $3); }
-					| IDENTIFIER ASSIGNMENT_OP DOUBLE_VAL SEMICOLON                     { insert_tuple_assign($1, $3); intialize_variable_number($1, $3); }
-					| IDENTIFIER ASSIGNMENT_OP CHAR_VAL SEMICOLON                       { insert_tuple_assign($1, $3); intialize_variable_char($1, $3); }
-					| IDENTIFIER ASSIGNMENT_OP STRING_VAL SEMICOLON                     { insert_tuple_assign($1, $3); intialize_variable_string($1, $3); }
+assignment: IDENTIFIER ASSIGNMENT_OP variable operator variable SEMICOLON   { insert_quad_assign($1, $3, $4, $5); intialize_variable_expression($1, $3, $5);}
+					| IDENTIFIER ASSIGNMENT_OP variable SEMICOLON                     { insert_tuple_assign($1, $3); intialize_variable_variable($1, $3); }
 					;
+
+variable: IDENTIFIER | INT_VAL | DOUBLE_VAL | CHAR_VAL | STRING_VAL;
+
+operator: ADD_OP | MINUS_OP;
 %%
 
 struct sym_tab_entry sym_table[100];

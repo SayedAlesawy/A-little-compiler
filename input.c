@@ -1,7 +1,7 @@
 int ma;
 ma = 1;
 int sha;
-sha = 2;
+sha = 2 + 1;
 int ba;
 ba = sha + ma;
 string j;
@@ -19,6 +19,8 @@ string str;
 str = "sayed";
 str = "abcd";
 int kareem;
+string kareeeem;
+kareeeem = 1 + ba;
 x = 5;
 kareem = x - y;
 lol = 2.3563;
