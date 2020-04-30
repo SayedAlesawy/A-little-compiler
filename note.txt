@@ -1,0 +1,15 @@
+Notes:
+1. The language only supports declarations and assignments.
+2. Declarations and assignments are 2 different statements, i.e. you can't assign a variable on declaration.
+3. A variable can be assigned a value (int, string, double, char), or another variable, or an expression.
+4. Addition and subtraction are the only 2 expressions supported.
+5. Addition and subtraction are only supported for variable operands, i.e. z = x +/- y only.
+
+Semantic errors:
+1. A variable used without being declared.
+2. Type mismatch (int and doubles are considered matching type, i.e, we support downcasting).
+3. A variable used without being initialized.
+4. A variable declared twice (same name).
+
+Symbol table:
+1. The symbol table only shows values for non-expression statements.
