@@ -37,11 +37,11 @@ STRING_VAL	\"{printable_ascii}*\"
 "char"    { save_token(); return CHAR; }
 "string"  { save_token(); return STRING; }
 
-";"   { return SEMICOLON; }
-"."		{ return DOT; }
-"-"   { return MINUS_OP; }
-"+"   { return ADD_OP; }
-"="		{ return ASSIGNMENT_OP; }
+";"   { save_token(); return SEMICOLON; }
+"."		{ save_token(); return DOT; }
+"-"   { save_token(); return MINUS_OP; }
+"+"   { save_token(); return ADD_OP; }
+"="		{ save_token(); return ASSIGNMENT_OP; }
 
 {IDENTIFIER}    { save_token(); return IDENTIFIER; }
 {INT_VAL} 		  { save_token(); return INT_VAL; }

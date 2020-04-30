@@ -1,4 +1,4 @@
 bison -d parser.y &&
 flex lexer.l &&
-gcc -o little-faggot parser.tab.c lex.yy.c &&
-./little-faggot $1
+gcc -o compiler parser.tab.c lex.yy.c &&
+./compiler $1

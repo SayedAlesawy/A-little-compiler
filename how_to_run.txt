@@ -1,0 +1,5 @@
+How to run?
+1. Just run the included shell script ./run.sh <file_name>
+   for example: ./run.sh input_wrong.c
+
+Note: you may need to give permissions to the shell script -> chmod +x run.sh
