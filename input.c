@@ -1,4 +1,5 @@
 int ma;
+int ma;
 ma = 1;
 int sha;
 sha = 2 + 1;
