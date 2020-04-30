@@ -18,12 +18,8 @@
 	void insert_declration();
 	void insert_quad_assign();
 	void insert_tuple_assign();
-	void intialize_variable_number();
-	void intialize_variable_string();
-	void intialize_variable_char();
-	void intialize_variable_variable();
 	void intialize_variable_expression();
-
+	void intialize_variable();
 	void insert_in_sym_tab();
 
 	struct statment {
@@ -64,7 +60,7 @@ type: INT | DOUBLE | CHAR | STRING;
 assignments: assignments assignment | assignment;
 
 assignment: IDENTIFIER ASSIGNMENT_OP variable operator variable SEMICOLON   { insert_quad_assign($1, $3, $4, $5); intialize_variable_expression($1, $3, $5);}
-					| IDENTIFIER ASSIGNMENT_OP variable SEMICOLON                     { insert_tuple_assign($1, $3); intialize_variable_variable($1, $3); }
+					| IDENTIFIER ASSIGNMENT_OP variable SEMICOLON                     { insert_tuple_assign($1, $3); intialize_variable($1, $3); }
 					;
 
 variable: IDENTIFIER | INT_VAL | DOUBLE_VAL | CHAR_VAL | STRING_VAL;
@@ -148,56 +144,61 @@ bool check_type_match(char* required_type, char* var_type)
 	}
 	return true;
 }
+int check_val_type(char* val)
+{
+	if(val[0] == '\''){
+		return 0;
+	}
+	if(val[0] == '"'){
+		return 1;
+	}
+	if(val[0] >= '0' && val[0] <= '9'){
+		return 2;
+	}
+	return 3;
+}
+int convert_name_type(char * var_type)
+{
+	if(check_type_match(var_type, "int") || check_type_match(var_type, "double")){
+		return 2;
+	}
+	if(check_type_match(var_type, "string")){
+		return 1;
+	}
+	if(check_type_match(var_type, "char")){
+		return 0;
+	}
+	return -1;
+}
 
-void intialize_variable_number(char * name, char * value)
+void intialize_variable(char * name, char * value)
 {
 	if(!in_sym_table(name)) { semantic_failure(); return; }
 	char* var_type = get_type_from_sym_tab(name);
 	if( var_type == NULL) { semantic_failure(); return; }
-	if(!check_type_match(var_type, "int") && !check_type_match(var_type, "double")) { semantic_failure(); return; }
-	set_intialized_state_for_var(name, value);
-}
+	int var_type_int = convert_name_type(var_type);
+	int val_type = check_val_type(value);
+	if(val_type != 3){
+		if(var_type_int != val_type){ semantic_failure(); return; }
+		set_intialized_state_for_var(name, value);
+	}
+	else{
+		if(!in_sym_table(value)) { semantic_failure(); return; }
+		if(!is_intialized(value)) { semantic_failure(); return; }
 
-void intialize_variable_string(char * name, char *value)
-{
-	if(!in_sym_table(name)) { semantic_failure(); return; }
-	char* var_type = get_type_from_sym_tab(name);
-	if( var_type == NULL) { semantic_failure(); return; }
-	if(!check_type_match(var_type, "string")) { semantic_failure(); return; }
-	set_intialized_state_for_var(name, value);
-}
+		char* v_type = get_type_from_sym_tab(value);
+		if( v_type == NULL) { semantic_failure(); return; }
+		int v_type_int = convert_name_type(v_type);
 
-
-void intialize_variable_char(char * name, char *value)
-{
-	if(!in_sym_table(name)) { semantic_failure(); return; }
-	char* var_type = get_type_from_sym_tab(name);
-	if( var_type == NULL) { semantic_failure(); return; }
-	char* required_type = "char";
-	if(!check_type_match(var_type, "char")) { semantic_failure(); return; }
-	set_intialized_state_for_var(name, value);
-}
-
-bool is_castable(char * v1_type, char * v2_type)
-{
-	return (check_type_match(v1_type, "int") || check_type_match(v1_type, "double")) && (check_type_match(v2_type, "int") || check_type_match(v2_type, "double"));
-}
-void intialize_variable_variable(char * v1_name, char * v2_name)
-{
-	if(!in_sym_table(v1_name) || !in_sym_table(v2_name)) { semantic_failure(); return; }
-	if(!is_intialized(v2_name)) { semantic_failure(); return; }
-	char * v1_type = get_type_from_sym_tab(v1_name);
-	char * v2_type = get_type_from_sym_tab(v2_name);
-
-	if(!check_type_match(v1_type, v2_type) && !is_castable(v1_type, v2_type)) { semantic_failure(); return; }
-	char * v2_value = get_value_from_sym_tab(v2_name);
-	set_intialized_state_for_var(v1_name, v2_value);
+		if(v_type_int != var_type_int){ semantic_failure(); return; }
+		set_intialized_state_for_var(name, get_value_from_sym_tab(value));
+	}
 }
 
 void intialize_variable_expression(char * v1_name, char * v2_name, char * v3_name)
 {
-	intialize_variable_variable(v1_name, v2_name);
-	intialize_variable_variable(v1_name, v3_name);
+	intialize_variable(v1_name, v2_name);
+	intialize_variable(v1_name, v3_name);
 }
 
 void print_sym_tab() {
