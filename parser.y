@@ -12,7 +12,7 @@
 
 	void yyerror();
 	void semantic_failure();
-
+	void semantic_failure_param();
 	void print_quad();
 	void print_tuple();
 	void insert_declration();
@@ -112,7 +112,7 @@ bool is_intialized(char* name)
 
 void insert_in_sym_tab(char* type, char* name)
 {
-	if(in_sym_table(name)) { semantic_failure(); return; }
+	if(in_sym_table(name)) { semantic_failure_param("Redeclaration of already declared variable"); return; }
 
 	struct sym_tab_entry sym_entry;
 
@@ -173,24 +173,24 @@ int convert_name_type(char * var_type)
 
 void intialize_variable(char * name, char * value)
 {
-	if(!in_sym_table(name)) { semantic_failure(); return; }
+	if(!in_sym_table(name)) { semantic_failure_param("First operand not declared"); return; }
 	char* var_type = get_type_from_sym_tab(name);
 	if( var_type == NULL) { semantic_failure(); return; }
 	int var_type_int = convert_name_type(var_type);
 	int val_type = check_val_type(value);
 	if(val_type != 3){
-		if(var_type_int != val_type){ semantic_failure(); return; }
+		if(var_type_int != val_type){ semantic_failure_param("Operand and value are of different non castable types"); return; }
 		set_intialized_state_for_var(name, value);
 	}
 	else{
-		if(!in_sym_table(value)) { semantic_failure(); return; }
-		if(!is_intialized(value)) { semantic_failure(); return; }
+		if(!in_sym_table(value)) { semantic_failure_param("Second operand not declared"); return; }
+		if(!is_intialized(value)) { semantic_failure_param("Second operand not intialized"); return; }
 
 		char* v_type = get_type_from_sym_tab(value);
 		if( v_type == NULL) { semantic_failure(); return; }
 		int v_type_int = convert_name_type(v_type);
 
-		if(v_type_int != var_type_int){ semantic_failure(); return; }
+		if(v_type_int != var_type_int){ semantic_failure_param("Two operands are of different non castable types"); return; }
 		set_intialized_state_for_var(name, get_value_from_sym_tab(value));
 	}
 }
@@ -283,6 +283,11 @@ void print_quadruples()
 void semantic_failure()
 {
 	fprintf(stderr, "Semantic error at line %d\n", line_num);
+}
+
+void semantic_failure_param(char * err)
+{
+	fprintf(stderr, "Semantic error at line %d | %s\n", line_num, err);
 }
 
 void yyerror()
